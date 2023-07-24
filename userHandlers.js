@@ -42,7 +42,7 @@ const postUser = (req, res) => {
     )
     .catch((err) => {
       console.log(err);
-      sendStatus(500);
+      res.sendStatus(500);
     });
 };
 
@@ -68,4 +68,22 @@ const updateUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, getUsersById, postUser, updateUser };
+const deleteUser = (req, res) => {
+  const { id } = req.params;
+
+  database
+    .query("DELETE FROM users WHERE id=?", [id])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(200);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+};
+
+module.exports = { getUsers, getUsersById, postUser, updateUser, deleteUser };
