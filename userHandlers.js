@@ -1,7 +1,8 @@
 const database = require("./database");
 
 const getUsers = (req, res) => {
-  const initialSql = "SELECT * FROM users";
+  const initialSql =
+    "SELECT id, firstname, lastname, email, city, language FROM users";
   const where = [];
 
   if (req.query.language) {
@@ -41,7 +42,10 @@ const getUsersById = (req, res) => {
   const id = parseInt(req.params.id);
 
   database
-    .query("SELECT * FROM users WHERE id = ?", [id])
+    .query(
+      "SELECT id, firstname, lastname, email, city, language FROM users WHERE id = ?",
+      [id]
+    )
     .then(([users]) => {
       if (users[0]) {
         res.status(200).json(users);
@@ -56,11 +60,12 @@ const getUsersById = (req, res) => {
 };
 
 const postUser = (req, res) => {
-  const { firstname, lastname, email, city, language } = req.body;
+  const { firstname, lastname, email, city, language, hashedPassword } =
+    req.body;
   database
     .query(
-      "INSERT INTO users (firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
-      [firstname, lastname, email, city, language]
+      "INSERT INTO users (firstname, lastname, email, city, language, hashedPassword) VALUES (?, ?, ?, ?, ?, ?)",
+      [firstname, lastname, email, city, language, hashedPassword]
     )
     .then(([result]) =>
       res.location(`/api/users/${result.insertId}`).sendStatus(201)
@@ -73,12 +78,13 @@ const postUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { id } = req.params;
-  const { firstname, lastname, email, city, language } = req.body;
+  const { firstname, lastname, email, city, language, hashedPassword } =
+    req.body;
 
   database
     .query(
-      "UPDATE users SET firstname=?, lastname=?, email=?, city=?, language=? WHERE id=?",
-      [firstname, lastname, email, city, language, id]
+      "UPDATE users SET firstname=?, lastname=?, email=?, city=?, language=?, hashedPassword=? WHERE id=?",
+      [firstname, lastname, email, city, language, hashedPassword, id]
     )
     .then(([result]) => {
       if (result.affectedRows === 0) {
