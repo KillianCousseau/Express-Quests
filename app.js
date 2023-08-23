@@ -31,21 +31,41 @@ app.get("/justToTest", step1, step2, lastStep);
 const { validateMovie, validateUser } = require("./validators");
 const movieHandlers = require("./movieHandlers");
 const userHandlers = require("./userHandlers");
-const { hashPassword } = require("./auth");
+const {
+  hashPassword,
+  verifyPassword,
+  verifyToken,
+  verifyUser,
+} = require("./auth");
+const { loginHandler } = require("./loginHandler");
 
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUsersById);
 
-app.post("/api/movies", validateMovie, movieHandlers.postMovie);
+app.post(
+  "/api/login",
+  userHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);
 app.post("/api/users", validateUser, hashPassword, userHandlers.postUser);
 
+app.use(verifyToken);
+
+app.post("/api/movies", validateMovie, movieHandlers.postMovie);
+
 app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
-app.put("/api/users/:id", validateUser, hashPassword, userHandlers.updateUser);
+app.put(
+  "/api/users/:id",
+  verifyUser,
+  validateUser,
+  hashPassword,
+  userHandlers.updateUser
+);
 
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
-app.delete("/api/users/:id", userHandlers.deleteUser);
+app.delete("/api/users/:id", verifyUser, userHandlers.deleteUser);
 
 app.listen(port, (err) => {
   if (err) {
